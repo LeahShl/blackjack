@@ -30,21 +30,6 @@ const uint8_t SPADES = 0x08;
 // OTHER CONSTS
 const size_t CARD_STR_SIZE = 6;
 
-// STRUCT DEFINES
-typedef struct Card_t Card_t;
-struct Card_t
-{
-    uint8_t data;
-    Card_t *next;
-};
-
-typedef struct Deck_t Deck_t;
-struct Deck_t
-{
-    Card_t *head;
-    size_t len;
-};
-
 //////////////////////////////////
 //            FUNCS             //
 //////////////////////////////////
