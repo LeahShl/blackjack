@@ -1,7 +1,14 @@
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include "cards.h"
 
 #define DEFAULT_CASH 1000
+#define ERR 0
+#define OK 1
+#define ERR_SIZE 256
+
+
 
 typedef struct Blackjack_Gamestate_t Blackjack_Gamestate_t;
 struct Blackjack_Gamestate_t
@@ -13,6 +20,7 @@ struct Blackjack_Gamestate_t
     int pot;
     int dealer_score;
     int player_score;
+    char err_msg[ERR_SIZE]; //contains a message describing the last error that occured
 };
 
 // 1. INITIALIZATION
@@ -33,7 +41,7 @@ struct Blackjack_Gamestate_t
 
 Blackjack_Gamestate_t * init_blackjack_game(){
     Blackjack_Gamestate_t *gamestate = malloc(sizeof(Blackjack_Gamestate_t));
-    //TODO: check for failure
+    //TODO: check for failure and return NULL
     gamestate->deck = init_full_deck();
     gamestate->dealer_hand = init_empty_deck();
     gamestate->player_hand = init_empty_deck();
@@ -41,6 +49,71 @@ Blackjack_Gamestate_t * init_blackjack_game(){
     gamestate->pot = 0;
     gamestate->dealer_score = 0;
     gamestate->player_score = 0;
+}
+
+int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
+    if(amount == 0 & gamestate->pot > 0){
+        return OK;
+    }
+    else if(amount > 0 && amount % 10 == 0 && amount <= gamestate->cash){
+        gamestate->cash -= amount;
+        gamestate->pot += amount;
+        return OK;
+    }
+    strncpy(gamestate->err_msg, "[Betting] Amount to bet must be a non-negative integer divisible by 10", ERR_SIZE);
+    return ERR;
+}
+
+static int calculate_scores(Blackjack_Gamestate_t *gamestate){
+    Card_t *p = gamestate->dealer_hand->head;
+    bool has_ace = false;
+    int score = 0;
+
+    // Dealer
+    while(p){
+        uint8_t rank = p->data >> 4;
+        if(rank > 10)
+            rank = 10;
+        if(rank == 1)
+            has_ace = true;
+        score += rank;
+    }
+    if(has_ace && score < 12){
+        score += 10;
+    }
+    gamestate->dealer_score = score;
+
+    // Player
+    p = gamestate->player_hand->head;
+    has_ace = false;
+    score = 0;
+    while(p){
+        uint8_t rank = p->data >> 4;
+        if(rank > 10)
+            rank = 10;
+        if(rank == 1)
+            has_ace = true;
+        score += rank;
+    }
+    if(has_ace && score < 12){
+        score += 10;
+    }
+    gamestate->player_score = score;
+}
+
+void initial_deal(Blackjack_Gamestate_t *gamestate){
+
+}
+
+void hit(Blackjack_Gamestate_t *gamestate){
+
+}
+
+void stand(Blackjack_Gamestate_t *gamestate){
+    
+}
+
+void dealer_draw(Blackjack_Gamestate_t *gamestate){
 
 }
 
