@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "cards.h"
 
 // RANK CONSTS
 const uint8_t R_MASK = 0xF0;
@@ -52,7 +53,7 @@ struct Deck_t
  * Creates a new card.
  * Doesn't check data for correctness.
  */
-Card_t * new_card(uint8_t rank, uint8_t suit){
+static Card_t * new_card(uint8_t rank, uint8_t suit){
     Card_t *c = malloc(sizeof(Card_t));
     //TODO: check if failed
     c->data = rank | suit;
@@ -72,16 +73,6 @@ Deck_t * init_empty_deck(){
 }
 
 /**
- * Adds card c to the top (head) of deck d.
- * Will override whatever next card c is pointing to.
- */
-void addh_card(Deck_t *d, Card_t *c){
-    c->next = d->head;
-    d->head = c;
-    d->len += 1;
-}
-
-/**
  * Initializes a full deck of 52 cards
  */
 Deck_t * init_full_deck(){
@@ -93,6 +84,30 @@ Deck_t * init_full_deck(){
         }
     }
     return d;
+}
+
+/**
+ * Adds card c to the top (head) of deck d.
+ * Will override whatever next card c is pointing to.
+ */
+void addh_card(Deck_t *d, Card_t *c){
+    c->next = d->head;
+    d->head = c;
+    d->len += 1;
+}
+
+/**
+ * Adds card c to the tail of deck d.
+ */
+void addt_card(Deck_t *d, Card_t *c){
+    Card_t *p = d->head;
+    while(p->next)
+    {
+        p = p->next;
+    }
+    p->next = c;
+    c->next = NULL;
+    d->len += 1;
 }
 
 /**
@@ -128,29 +143,13 @@ Card_t * draw_at(Deck_t *d, size_t n){
  * Selects the card at the top of deck d.
  */
 Card_t * draw_top(Deck_t *d){
-    Card_t *c = d->head;
-    d->head = d->head->next;
-    return c;
-}
-
-/**
- * Adds card c to the tail of deck d.
- */
-void addt_card(Deck_t *d, Card_t *c){
-    Card_t *p = d->head;
-    while(p->next)
-    {
-        p = p->next;
-    }
-    p->next = c;
-    c->next = NULL;
-    d->len += 1;
+    return draw_at(d, 0);
 }
 
 /**
  * Creates a null-terminated string representing card c
  */
-void card_str(Card_t *c, char *s){
+static void card_str(Card_t *c, char *s){
     size_t i = 0;
     uint8_t rank = c->data & R_MASK;
     uint8_t suit = c->data & S_MASK;
