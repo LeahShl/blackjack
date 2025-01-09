@@ -49,10 +49,12 @@ Blackjack_Gamestate_t * init_blackjack_game(){
     gamestate->pot = 0;
     gamestate->dealer_score = 0;
     gamestate->player_score = 0;
+
+    return gamestate;
 }
 
 int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
-    if(amount == 0 & gamestate->pot > 0){
+    if(amount == 0 && gamestate->pot > 0){
         return OK;
     }
     else if(amount > 0 && amount % 10 == 0 && amount <= gamestate->cash){
@@ -64,7 +66,7 @@ int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
     return ERR;
 }
 
-static int calculate_scores(Blackjack_Gamestate_t *gamestate){
+void calculate_scores(Blackjack_Gamestate_t *gamestate){
     Card_t *p = gamestate->dealer_hand->head;
     bool has_ace = false;
     int score = 0;
