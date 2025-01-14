@@ -6,7 +6,6 @@
 
 #define DEFAULT_CASH 1000
 #define MIN_CASH 10
-#define N_CARDS 52
 
 #define ERR 0
 #define OK 1
@@ -68,7 +67,7 @@ int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
     return ERR;
 }
 
-void calculate_scores(Blackjack_Gamestate_t *gamestate){
+static void calculate_scores(Blackjack_Gamestate_t *gamestate){
     Card_t *p = gamestate->dealer_hand->head;
     bool has_ace = false;
     int score = 0;
