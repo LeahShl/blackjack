@@ -7,11 +7,18 @@
 #define DEFAULT_CASH 1000
 #define MIN_CASH 10
 #define N_CARDS 52
+
 #define ERR 0
 #define OK 1
 #define ERR_SIZE 256
 
-
+#define STATE_DEAL 0
+#define STATE_GAME_OVER 1
+#define STATE_BLACKJACK 2
+#define STATE_PBUST 3
+#define STATE_DBUST 4
+#define STATE_TIE 5
+#define STATE_DWIN 6
 
 typedef struct Blackjack_Gamestate_t Blackjack_Gamestate_t;
 struct Blackjack_Gamestate_t
@@ -20,31 +27,19 @@ struct Blackjack_Gamestate_t
     int pot;
     int dealer_score;
     int player_score;
+    int state;
     Deck_t *deck;
     Deck_t *dealer_hand;
     Deck_t *player_hand;
     char err_msg[ERR_SIZE]; //contains a message describing the last error that occured
 };
 
-// 1. INITIALIZATION
-    // init full deck
-    // init empty dealer's hand
-    // init empty player's hand
-    // 2. BETTING
-    // check for empty cash
-    // print game over if no cash
-    // print message asking the player to bet
-    // 3. INITIAL DEAL
-    // draw 2 cards for each player
-    // 4. BLACKJACK CHECK
-    // if blackjack end game
-    // 5. HIT OR STAND
-    // 6. DEALR"S DRAW
-    // 7. RESET
-
 Blackjack_Gamestate_t * init_blackjack_game(){
     Blackjack_Gamestate_t *gamestate = malloc(sizeof(Blackjack_Gamestate_t));
-    //TODO: check for failure and return NULL
+    if(!gamestate){
+        return NULL;
+    }
+
     gamestate->deck = init_full_deck();
     gamestate->dealer_hand = init_empty_deck();
     gamestate->player_hand = init_empty_deck();
@@ -52,15 +47,12 @@ Blackjack_Gamestate_t * init_blackjack_game(){
     gamestate->pot = 0;
     gamestate->dealer_score = 0;
     gamestate->player_score = 0;
+    gamestate->state = STATE_DEAL;
 
     // init rand seed for random card draw
     srand(time(NULL));
 
     return gamestate;
-}
-
-int has_cash(Blackjack_Gamestate_t *gamestate){
-    return (gamestate->cash >= MIN_CASH);
 }
 
 int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
@@ -110,6 +102,7 @@ void calculate_scores(Blackjack_Gamestate_t *gamestate){
     if(has_ace && score < 12){
         score += 10;
     }
+
     gamestate->player_score = score;
 }
 
@@ -122,27 +115,71 @@ void initial_deal(Blackjack_Gamestate_t *gamestate){
         c = draw_at(gamestate->deck, rand() % gamestate->deck->len);
         addt_card(gamestate->player_hand, c);
     }
-    calculate_scores(gamestate);
-}
 
-int is_blackjack(Blackjack_Gamestate_t *gamestate){
-    return gamestate->player_score == 21;
+    calculate_scores(gamestate);
+
+    // Blackjack check
+    if(gamestate->player_score == 21){
+        gamestate->state = STATE_BLACKJACK;
+        gamestate->cash += gamestate->pot * 2.5;
+        gamestate->pot = 0;
+    }
 }
 
 void hit(Blackjack_Gamestate_t *gamestate){
-    
-}
+    Card_t *c = draw_at(gamestate->deck, rand() % gamestate->deck->len);
+    addt_card(gamestate->player_hand, c);
 
-void stand(Blackjack_Gamestate_t *gamestate){
-    
+    calculate_scores(gamestate);
+
+    // Check for player's bust
+    if(gamestate->player_score > 21){
+        gamestate->state = STATE_PBUST;
+        gamestate->pot = 0;
+    }
+        
 }
 
 void dealer_draw(Blackjack_Gamestate_t *gamestate){
+    while(1) {
+        if(gamestate->dealer_score >= 17 || gamestate->dealer_score > gamestate->player_score)
+            break;
+        
+        Card_t *c = draw_at(gamestate->deck, rand() % gamestate->deck->len);
+        addt_card(gamestate->dealer_hand, c);
+        calculate_scores(gamestate);
+    }
 
+    // Check for dealer's bust
+    if(gamestate->dealer_score > 21){
+        gamestate->state = STATE_DBUST;
+        gamestate->cash += gamestate->pot * 2;
+        gamestate->pot = 0;
+
+    }
+    else if(gamestate->dealer_score > gamestate->player_score){
+        gamestate->state = STATE_DWIN;
+        gamestate->pot = 0;
+    }
+    else if(gamestate->dealer_score == gamestate->player_score){
+        gamestate->state = STATE_TIE;
+    }
 }
 
 void reset_cards(Blackjack_Gamestate_t *gamestate){
+    // Empty dealer's hand to deck
+    Card_t *c = draw_top(gamestate->dealer_hand);
+    while(c){
+        addh_card(gamestate->deck, c);
+        c = c->next;
+    }
 
+    // Empty player's hand to deck
+    c = draw_top(gamestate->player_hand);
+    while(c){
+        addh_card(gamestate->deck, c);
+        c = c->next;
+    }
 }
 
 void end_game(Blackjack_Gamestate_t *gamestate){
