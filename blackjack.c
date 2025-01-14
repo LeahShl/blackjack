@@ -1,9 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 #include "cards.h"
 
 #define DEFAULT_CASH 1000
+#define MIN_CASH 10
+#define N_CARDS 52
 #define ERR 0
 #define OK 1
 #define ERR_SIZE 256
@@ -13,13 +16,13 @@
 typedef struct Blackjack_Gamestate_t Blackjack_Gamestate_t;
 struct Blackjack_Gamestate_t
 {
-    Deck_t *deck;
-    Deck_t *dealer_hand;
-    Deck_t *player_hand;
     int cash;
     int pot;
     int dealer_score;
     int player_score;
+    Deck_t *deck;
+    Deck_t *dealer_hand;
+    Deck_t *player_hand;
     char err_msg[ERR_SIZE]; //contains a message describing the last error that occured
 };
 
@@ -50,7 +53,14 @@ Blackjack_Gamestate_t * init_blackjack_game(){
     gamestate->dealer_score = 0;
     gamestate->player_score = 0;
 
+    // init rand seed for random card draw
+    srand(time(NULL));
+
     return gamestate;
+}
+
+int has_cash(Blackjack_Gamestate_t *gamestate){
+    return (gamestate->cash >= MIN_CASH);
 }
 
 int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
@@ -104,11 +114,23 @@ void calculate_scores(Blackjack_Gamestate_t *gamestate){
 }
 
 void initial_deal(Blackjack_Gamestate_t *gamestate){
+    // Draw 2 random cards for each player
+    for (int i = 0; i < 2; i++)
+    {
+        Card_t *c = draw_at(gamestate->deck, rand() % gamestate->deck->len);
+        addt_card(gamestate->dealer_hand, c);
+        c = draw_at(gamestate->deck, rand() % gamestate->deck->len);
+        addt_card(gamestate->player_hand, c);
+    }
+    calculate_scores(gamestate);
+}
 
+int is_blackjack(Blackjack_Gamestate_t *gamestate){
+    return gamestate->player_score == 21;
 }
 
 void hit(Blackjack_Gamestate_t *gamestate){
-
+    
 }
 
 void stand(Blackjack_Gamestate_t *gamestate){
@@ -116,6 +138,10 @@ void stand(Blackjack_Gamestate_t *gamestate){
 }
 
 void dealer_draw(Blackjack_Gamestate_t *gamestate){
+
+}
+
+void reset_cards(Blackjack_Gamestate_t *gamestate){
 
 }
 
