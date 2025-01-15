@@ -7,8 +7,6 @@
 #define DEFAULT_CASH 1000
 #define MIN_CASH 10
 
-#define ERR 0
-#define OK 1
 #define ERR_SIZE 256
 
 #define STATE_DEAL 0
@@ -18,6 +16,7 @@
 #define STATE_DBUST 4
 #define STATE_TIE 5
 #define STATE_DWIN 6
+#define STATE_PWIN 7
 
 typedef struct Blackjack_Gamestate_t Blackjack_Gamestate_t;
 struct Blackjack_Gamestate_t
@@ -54,17 +53,21 @@ Blackjack_Gamestate_t * init_blackjack_game(){
     return gamestate;
 }
 
-int player_bet(Blackjack_Gamestate_t *gamestate, int amount){
+bool player_bet(Blackjack_Gamestate_t *gamestate, int amount){
     if(amount == 0 && gamestate->pot > 0){
-        return OK;
+        return true;
     }
-    else if(amount > 0 && amount % 10 == 0 && amount <= gamestate->cash){
+    else if(amount > gamestate->cash){
+        strncpy(gamestate->err_msg, "You cannot bet more money than you have...", ERR_SIZE);
+        return false;
+    }
+    else if(amount > 0 && amount % 10 == 0){
         gamestate->cash -= amount;
         gamestate->pot += amount;
-        return OK;
+        return true;
     }
-    strncpy(gamestate->err_msg, "[Betting] Amount to bet must be a non-negative integer divisible by 10", ERR_SIZE);
-    return ERR;
+    strncpy(gamestate->err_msg, "Amount to bet must be a non-negative integer divisible by 10", ERR_SIZE);
+    return false;
 }
 
 static void calculate_scores(Blackjack_Gamestate_t *gamestate){
@@ -80,6 +83,7 @@ static void calculate_scores(Blackjack_Gamestate_t *gamestate){
         if(rank == 1)
             has_ace = true;
         score += rank;
+        p = p->next;
     }
     if(has_ace && score < 12){
         score += 10;
@@ -97,6 +101,7 @@ static void calculate_scores(Blackjack_Gamestate_t *gamestate){
         if(rank == 1)
             has_ace = true;
         score += rank;
+        p = p->next;
     }
     if(has_ace && score < 12){
         score += 10;
@@ -162,6 +167,10 @@ void dealer_draw(Blackjack_Gamestate_t *gamestate){
     }
     else if(gamestate->dealer_score == gamestate->player_score){
         gamestate->state = STATE_TIE;
+    }
+    else if(gamestate->dealer_score < gamestate->player_score){
+        gamestate->state = STATE_PWIN;
+        gamestate->cash += gamestate->pot;
     }
 }
 

@@ -1,8 +1,6 @@
 #pragma once
 #include "cards.h"
 
-#define ERR 0
-#define OK 1
 #define ERR_SIZE 256
 
 #define STATE_DEAL 0
@@ -12,6 +10,7 @@
 #define STATE_DBUST 4
 #define STATE_TIE 5
 #define STATE_DWIN 6
+#define STATE_PWIN 7
 
 typedef struct Blackjack_Gamestate_t Blackjack_Gamestate_t;
 struct Blackjack_Gamestate_t
@@ -28,8 +27,7 @@ struct Blackjack_Gamestate_t
 };
 
 Blackjack_Gamestate_t * init_blackjack_game();
-
-int player_bet(Blackjack_Gamestate_t *gamestate, int amount);
+bool player_bet(Blackjack_Gamestate_t *gamestate, int amount);
 
 void initial_deal(Blackjack_Gamestate_t *gamestate);
 

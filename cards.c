@@ -86,13 +86,18 @@ void addh_card(Deck_t *d, Card_t *c){
  */
 void addt_card(Deck_t *d, Card_t *c){
     Card_t *p = d->head;
-    while(p->next)
-    {
-        p = p->next;
+    if(p == NULL){
+        addh_card(d, c);
     }
-    p->next = c;
-    c->next = NULL;
-    d->len += 1;
+    else {
+        while(p->next)
+        {
+            p = p->next;
+        }
+        p->next = c;
+        c->next = NULL;
+        d->len += 1;
+    }
 }
 
 /**
