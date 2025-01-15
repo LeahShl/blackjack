@@ -62,8 +62,7 @@ bool player_bet(Blackjack_Gamestate_t *gamestate, int amount){
         return false;
     }
     else if(amount > 0 && amount % 10 == 0){
-        gamestate->cash -= amount;
-        gamestate->pot += amount;
+        gamestate->pot = amount;
         return true;
     }
     strncpy(gamestate->err_msg, "Amount to bet must be a non-negative integer divisible by 10", ERR_SIZE);
@@ -139,6 +138,7 @@ void hit(Blackjack_Gamestate_t *gamestate){
     // Check for player's bust
     if(gamestate->player_score > 21){
         gamestate->state = STATE_PBUST;
+        gamestate->cash -= gamestate->pot;
         gamestate->pot = 0;
     }
         
@@ -163,6 +163,7 @@ void dealer_draw(Blackjack_Gamestate_t *gamestate){
     }
     else if(gamestate->dealer_score > gamestate->player_score){
         gamestate->state = STATE_DWIN;
+        gamestate->cash -= gamestate->pot;
         gamestate->pot = 0;
     }
     else if(gamestate->dealer_score == gamestate->player_score){
@@ -179,14 +180,21 @@ void reset_cards(Blackjack_Gamestate_t *gamestate){
     Card_t *c = draw_top(gamestate->dealer_hand);
     while(c){
         addh_card(gamestate->deck, c);
-        c = c->next;
+        c = draw_top(gamestate->dealer_hand);
     }
 
     // Empty player's hand to deck
     c = draw_top(gamestate->player_hand);
     while(c){
         addh_card(gamestate->deck, c);
-        c = c->next;
+        c = draw_top(gamestate->player_hand);
+    }
+
+    if(gamestate->cash < MIN_CASH){
+        gamestate->state = STATE_GAME_OVER;
+    }
+    else{
+        gamestate->state = STATE_DEAL;
     }
 }
 

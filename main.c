@@ -37,7 +37,7 @@ int main(void) {
             // Betting
             int bet;
             bool result;
-            printf("You have %d in cash and a pot of %d from previous bets.\nHow much are you willing to bet? ", game->cash, game->pot);
+            printf("\n\nYou have %d in cash and a pot of %d from previous bets.\nHow much are you willing to bet? ", game->cash, game->pot);
             scanf("%d", &bet);
             result = player_bet(game, bet);
             while(!result){
@@ -96,7 +96,7 @@ int main(void) {
                         reset_cards(game);
                     }
                     else if(game->state == STATE_DWIN){
-                        printf("Dealer won! You lost your bet.");
+                        printf("Dealer won! You lost your bet.\n");
                         reset_cards(game);
                     }
                     else if(game->state == STATE_TIE){
@@ -115,8 +115,6 @@ int main(void) {
                     }
                 }
             }
-
-            break;
         }
         end_game(game);
     }
