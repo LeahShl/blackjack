@@ -30,4 +30,6 @@ Card_t * draw_top(Deck_t *d);
 
 void print_deck(Deck_t *d);
 
+void nprint_deck(Deck_t *d, int n);
+
 void free_deck(Deck_t *d);

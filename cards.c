@@ -206,7 +206,21 @@ void print_deck(Deck_t *d){
         printf("[ %s ] ", s);
         c = c->next;
     }
-    puts("\n");
+}
+
+/**
+ * Prints the first n elements of deck d
+ */
+void nprint_deck(Deck_t *d, int n){
+    Card_t *c = d->head;
+    int count = n;
+    while(c && count){
+        char s[CARD_STR_SIZE];
+        card_str(c, s);
+        printf("[ %s ] ", s);
+        c = c->next;
+        count--;
+    }
 }
 
 /**

@@ -4,9 +4,11 @@
 #include "cards.h"
 #include "blackjack.h"
 
+// Max number of attempts to get user input before aborting program
+#define MAX_ATTEMPTS 5
 
 const char *welcome_msg = 
-"\n\n\
+"\n\
 +===============================================================+\n\
 |          ░█▀▄░█░░░█▀█░█▀▀░█░█░▀▀█░█▀█░█▀▀░█░█░░░░█▀▀          |\n\
 |          ░█▀▄░█░░░█▀█░█░░░█▀▄░░░█░█▀█░█░░░█▀▄░░░░█░░          |\n\
@@ -22,7 +24,7 @@ int main(void) {
     printf("%s", welcome_msg);
     scanf(" %c", &user_choice);
     if(user_choice == 'y' || user_choice == 'Y'){
-        printf("\nOK - let's start!\n\n");
+        printf("\nOK - let's start!");
         Blackjack_Gamestate_t *game = init_blackjack_game();
         if(game == NULL){
             printf("ERROR: could not initiate game. Exiting...\n");
@@ -35,15 +37,21 @@ int main(void) {
             }
 
             // Betting
-            int bet;
+            int bet, attempt = 0;
             bool result;
             printf("\n\nYou have %d in cash and a pot of %d from previous bets.\nHow much are you willing to bet? ", game->cash, game->pot);
             scanf("%d", &bet);
             result = player_bet(game, bet);
-            while(!result){
+            while(!result && attempt < MAX_ATTEMPTS){
                 printf("\n%s\n\nBet again? ", game->err_msg);
                 scanf("%d", &bet);
                 result = player_bet(game, bet);
+                attempt++;
+            }
+            if (attempt == MAX_ATTEMPTS)
+            {
+                printf("\nToo many unsuccessful attempts. Exiting...\n");
+                exit(1);
             }
 
             // Deal cards
@@ -52,19 +60,28 @@ int main(void) {
             // Blackjack check
             print_stats(game, true);
             if(game->state == STATE_BLACKJACK){
-                printf("\nBlackjack! Your win!\n");
+                printf("\nBlackjack! Your won!\n");
                 reset_cards(game);
             }
             // Hit or stand
             else{
                 printf("\nHit or stand? [H]/[S]: ");
                 scanf(" %c", &user_choice);
+                attempt = 0;
                 while (user_choice != 'H' && user_choice != 'h' &&
-                       user_choice != 'S' && user_choice != 's')
+                       user_choice != 'S' && user_choice != 's' &&
+                       attempt < MAX_ATTEMPTS)
                 {
                     printf("\nInvalid choice. Hit or stand? [H]/[S]: ");
                     scanf(" %c", &user_choice);
+                    attempt++;
                 }
+                if (attempt == MAX_ATTEMPTS)
+                {
+                    printf("\nToo many unsuccessful attempts. Exiting...\n");
+                    exit(1);
+                }
+                
 
                 // Hit
                 while(user_choice == 'H' || user_choice == 'h'){
@@ -76,13 +93,21 @@ int main(void) {
                         break;
                     }
                     else{
+                        attempt = 0;
                         printf("\nHit or stand? [H]/[S]: ");
                         scanf(" %c", &user_choice);
                         while (user_choice != 'H' && user_choice != 'h' &&
-                               user_choice != 'S' && user_choice != 's')
+                               user_choice != 'S' && user_choice != 's' && 
+                               attempt < MAX_ATTEMPTS)
                         {
                             printf("\nInvalid choice. Hit or stand? [H]/[S]: ");
                             scanf(" %c", &user_choice);
+                            attempt++;
+                        }
+                        if (attempt == MAX_ATTEMPTS)
+                        {
+                            printf("\nToo many unsuccessful attempts. Exiting...\n");
+                            exit(1);
                         }
                     }
                 }
@@ -125,17 +150,18 @@ int main(void) {
 }
 
 void print_stats(Blackjack_Gamestate_t *gamestate, bool hidden){
-    printf("Player's hand: ");
+    printf("\n===============================================================\nPlayer's hand: ");
     print_deck(gamestate->player_hand);
     printf("\nScore: %d \t Cash: %d \t Pot: %d\n\n",gamestate->player_score, gamestate->cash, gamestate->pot);
 
     printf("Dealer's hand: ");
     if(hidden){
-        printf("?????");
-        printf("\nScore: ??\n\n");
+        nprint_deck(gamestate->dealer_hand, 1);
+        printf("[ ???? ]\nScore: ??\n");
     }
     else{
-        print_deck(gamestate->player_hand);
-        printf("\nScore: %d\n\n", gamestate->dealer_score);
+        print_deck(gamestate->dealer_hand);
+        printf("\nScore: %d\n", gamestate->dealer_score);
     }
+    printf("===============================================================\n");
 }
