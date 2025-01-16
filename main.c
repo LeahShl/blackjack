@@ -1,3 +1,8 @@
+/**
+ * @file main.c
+ * @brief 
+ * @date 2025-01-15
+ */
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -17,6 +22,12 @@ const char *welcome_msg =
 Welcome to Blackjack.c - a lightweight command-line game!\n\
 Start game? [Y] for yes, any other key to quit...\n";
 
+/**
+ * @brief Prints state and scores aesthetucally to stdout
+ * 
+ * @param gamestate The blackjack game to get info from
+ * @param hidden Hide dealer's data? true for yes, false fo no
+ */
 void print_stats(Blackjack_Gamestate_t *gamestate, bool hidden);
 
 int main(void) {
