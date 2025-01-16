@@ -18,7 +18,7 @@ Welcome to Blackjack.c - a lightweight command-line game!\n\
 Start game? [Y] for yes, any other key to quit...\n";
 
 /**
- * @brief Prints state and scores aesthetucally to stdout
+ * @brief Prints state and scores aesthetically to stdout
  * 
  * @param gamestate The blackjack game to get info from
  * @param hidden Hide dealer's data? true for yes, false fo no
@@ -158,12 +158,19 @@ int main(void) {
                         exit(1);
                     }
                 }
+                // Play again
+                printf("\n\nPlay again? [Y] for yes, any other key to quit... ");
+                scanf(" %c", &user_choice);
+                clear_stdin_buf();
+                if(user_choice != 'y' && user_choice != 'Y'){
+                    end_game(game);
+                    printf("\nGoodbye!\n");
+                    return 0;
+                }
             }
         }
         end_game(game);
     }
-
-    printf("\nGoodbye!\n\n");
 
     return 0;
 }
