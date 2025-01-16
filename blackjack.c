@@ -12,10 +12,20 @@ Blackjack_Gamestate_t * init_blackjack_game(){
     if(!gamestate){
         return NULL;
     }
-
+    
     gamestate->deck = init_full_deck();
+    if(!gamestate->deck){
+        return NULL;
+    }
     gamestate->dealer_hand = init_empty_deck();
+    if(!gamestate->dealer_hand){
+        return NULL;
+    }
     gamestate->player_hand = init_empty_deck();
+    if(!gamestate->player_hand){
+        return NULL;
+    }
+
     gamestate->cash = DEFAULT_CASH;
     gamestate->pot = 0;
     gamestate->dealer_score = 0;

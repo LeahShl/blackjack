@@ -25,10 +25,16 @@ Start game? [Y] for yes, any other key to quit...\n";
  */
 void print_stats(Blackjack_Gamestate_t *gamestate, bool hidden);
 
+/**
+ * @brief clears stdin buffer for a clean scanf
+ */
+void clear_stdin_buf();
+
 int main(void) {
     char user_choice;
     printf("%s", welcome_msg);
     scanf(" %c", &user_choice);
+    clear_stdin_buf();
     if(user_choice == 'y' || user_choice == 'Y'){
         printf("\nOK - let's start!");
         Blackjack_Gamestate_t *game = init_blackjack_game();
@@ -43,14 +49,17 @@ int main(void) {
             }
 
             // Betting
-            int bet, attempt = 0;
+            int bet = -1; // A negative value will raise an error upon scanf failure
+            int attempt = 0;
             bool result;
             printf("\n\nYou have %d in cash and a pot of %d from previous bets.\nHow much are you willing to bet? ", game->cash, game->pot);
-            scanf("%d", &bet);
+            scanf(" %d", &bet);
+            clear_stdin_buf();
             result = player_bet(game, bet);
             while(!result && attempt < MAX_ATTEMPTS){
                 printf("\n%s\n\nBet again? ", game->err_msg);
-                scanf("%d", &bet);
+                scanf(" %d", &bet);
+                clear_stdin_buf();
                 result = player_bet(game, bet);
                 attempt++;
             }
@@ -73,6 +82,7 @@ int main(void) {
             else{
                 printf("\nHit or stand? [H]/[S]: ");
                 scanf(" %c", &user_choice);
+                clear_stdin_buf();
                 attempt = 0;
                 while (user_choice != 'H' && user_choice != 'h' &&
                        user_choice != 'S' && user_choice != 's' &&
@@ -80,6 +90,7 @@ int main(void) {
                 {
                     printf("\nInvalid choice. Hit or stand? [H]/[S]: ");
                     scanf(" %c", &user_choice);
+                    clear_stdin_buf();
                     attempt++;
                 }
                 if (attempt == MAX_ATTEMPTS)
@@ -102,12 +113,14 @@ int main(void) {
                         attempt = 0;
                         printf("\nHit or stand? [H]/[S]: ");
                         scanf(" %c", &user_choice);
+                        clear_stdin_buf();
                         while (user_choice != 'H' && user_choice != 'h' &&
                                user_choice != 'S' && user_choice != 's' && 
                                attempt < MAX_ATTEMPTS)
                         {
                             printf("\nInvalid choice. Hit or stand? [H]/[S]: ");
                             scanf(" %c", &user_choice);
+                            clear_stdin_buf();
                             attempt++;
                         }
                         if (attempt == MAX_ATTEMPTS)
@@ -170,4 +183,9 @@ void print_stats(Blackjack_Gamestate_t *gamestate, bool hidden){
         printf("\nScore: %d\n", gamestate->dealer_score);
     }
     printf("===============================================================\n");
+}
+
+void clear_stdin_buf(){
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
 }
