@@ -40,100 +40,12 @@ const size_t CARD_STR_SIZE = 6;
  */
 static Card_t * new_card(uint8_t rank, uint8_t suit){
     Card_t *c = malloc(sizeof(Card_t));
-    //TODO: check if failed
+    if(!c){
+        return NULL;
+    }
     c->data = rank | suit;
     c->next = NULL;
     return c;
-}
-
-/**
- * Initializes an empty deck
- */
-Deck_t * init_empty_deck(){
-    Deck_t *d = malloc(sizeof(Deck_t));
-    //TODO: check if failed
-    d->head = NULL;
-    d->len = 0;
-    return d;
-}
-
-/**
- * Initializes a full deck of 52 cards
- */
-Deck_t * init_full_deck(){
-    Deck_t *d = init_empty_deck();
-    for(uint8_t suit = 0x01; suit <= 0x08; suit *= 0x02){
-        for(uint8_t rank = 0x10; rank <= 0xD0; rank += 0x10){
-            Card_t *c = new_card(rank, suit);
-            addh_card(d, c);
-        }
-    }
-    return d;
-}
-
-/**
- * Adds card c to the top (head) of deck d.
- * Will override whatever next card c is pointing to.
- */
-void addh_card(Deck_t *d, Card_t *c){
-    c->next = d->head;
-    d->head = c;
-    d->len += 1;
-}
-
-/**
- * Adds card c to the tail of deck d.
- */
-void addt_card(Deck_t *d, Card_t *c){
-    Card_t *p = d->head;
-    if(p == NULL){
-        addh_card(d, c);
-    }
-    else {
-        while(p->next)
-        {
-            p = p->next;
-        }
-        p->next = c;
-        c->next = NULL;
-        d->len += 1;
-    }
-}
-
-/**
- * Selects the nth card from deck d.
- * The head is the 0th card.
- */
-Card_t * draw_at(Deck_t *d, size_t n){
-    Card_t *curr = d->head, *prev = NULL;
-    for (size_t i = 0; curr != NULL && i < n; i++)
-    {
-        prev = curr;
-        curr = curr->next;
-    }
-    
-    // n bigger than size of deck
-    if(curr == NULL){
-        return NULL;
-    }
-
-    if(prev == NULL){
-        d->head = curr->next; 
-    }
-    else{
-        prev->next = curr->next; 
-    }
-
-    curr->next = NULL;
-    d->len -= 1;
-    return curr;
-}
-
-/**
- * Selects the card at the top of deck d.
- */
-Card_t * draw_top(Deck_t *d){
-    return draw_at(d, 0);
 }
 
 /**
@@ -195,9 +107,85 @@ static void card_str(Card_t *c, char *s){
     s[i] = '\0';
 }
 
-/**
- * Prints an entire deck to stdout
- */
+Deck_t * init_empty_deck(){
+    Deck_t *d = malloc(sizeof(Deck_t));
+    if(!d){
+        return NULL;
+    }
+    d->head = NULL;
+    d->len = 0;
+    return d;
+}
+
+Deck_t * init_full_deck(){
+    Deck_t *d = init_empty_deck();
+    if(!d){
+        return NULL;
+    }
+    for(uint8_t suit = 0x01; suit <= 0x08; suit *= 0x02){
+        for(uint8_t rank = 0x10; rank <= 0xD0; rank += 0x10){
+            Card_t *c = new_card(rank, suit);
+            if(!c){
+                free_deck(d);
+                return NULL;
+            }
+            addh_card(d, c);
+        }
+    }
+    return d;
+}
+
+void addh_card(Deck_t *d, Card_t *c){
+    c->next = d->head;
+    d->head = c;
+    d->len += 1;
+}
+
+void addt_card(Deck_t *d, Card_t *c){
+    Card_t *p = d->head;
+    if(p == NULL){
+        addh_card(d, c);
+    }
+    else {
+        while(p->next)
+        {
+            p = p->next;
+        }
+        p->next = c;
+        c->next = NULL;
+        d->len += 1;
+    }
+}
+
+Card_t * draw_at(Deck_t *d, size_t n){
+    Card_t *curr = d->head, *prev = NULL;
+    for (size_t i = 0; curr != NULL && i < n; i++)
+    {
+        prev = curr;
+        curr = curr->next;
+    }
+    
+    // n bigger than size of deck
+    if(curr == NULL){
+        return NULL;
+    }
+
+    if(prev == NULL){
+        d->head = curr->next; 
+    }
+    else{
+        prev->next = curr->next; 
+    }
+
+    curr->next = NULL;
+    d->len -= 1;
+    return curr;
+}
+
+Card_t * draw_top(Deck_t *d){
+    return draw_at(d, 0);
+}
+
 void print_deck(Deck_t *d){
     Card_t *c = d->head;
     while(c){
@@ -211,9 +199,9 @@ void print_deck(Deck_t *d){
 /**
  * Prints the first n elements of deck d
  */
-void nprint_deck(Deck_t *d, int n){
+void nprint_deck(Deck_t *d, size_t n){
     Card_t *c = d->head;
-    int count = n;
+    size_t count = n;
     while(c && count){
         char s[CARD_STR_SIZE];
         card_str(c, s);
