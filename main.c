@@ -1,8 +1,3 @@
-/**
- * @file main.c
- * @brief 
- * @date 2025-01-15
- */
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
