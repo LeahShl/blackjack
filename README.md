@@ -1,4 +1,4 @@
-# blackjack.c
+# blackjack
 An ultra-lightweight command-line based blackjack game
 
 ## File Structure
