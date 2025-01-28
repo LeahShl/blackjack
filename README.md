@@ -18,4 +18,21 @@ This blackjack game is implemented in three levels of abstraction. The cards are
 ## Getting Started
 This program was developed and tested on a linux machine, therefore it might not work on different machines. However, no machine-specific code was used, so it should compile just fine on a Windows machine.
 
+### Compilation 
 A Makefile is supplied for your convenience. Compile with `make` and clean with `make clean`.
+
+This project was also designed to be able to be compiled with the command:
+```
+$ gcc -std=c99 -Wall -Wextra -pedantic *.c -o blackjack
+```
+
+### Running
+If you used the Makefile to compile, run in your terminal:
+```
+$ ./blackjack
+```
+
+If you used any other method to compile, than it's your responsibility to find the name of the program.
+
+### Uninstalling
+Just delete this repo's directory from your computer. 
